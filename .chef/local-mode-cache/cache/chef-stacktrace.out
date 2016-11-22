@@ -1,5 +1,8 @@
-Generated at 2016-11-19 18:51:28 +0000
-SyntaxError: /home/alan/devel/chef-repo/.chef/local-mode-cache/cache/cookbooks/rxp_pipeline/resources/gitlab.rb:70: syntax error, unexpected keyword_end, expecting end-of-input
+Generated at 2016-11-19 20:23:18 +0000
+LoadError: cannot load such file -- gitlab
+/opt/chef/embedded/lib/ruby/site_ruby/2.3.0/rubygems/core_ext/kernel_require.rb:55:in `require'
+/opt/chef/embedded/lib/ruby/site_ruby/2.3.0/rubygems/core_ext/kernel_require.rb:55:in `require'
+/home/alan/devel/chef-repo/.chef/local-mode-cache/cache/cookbooks/rxp_pipeline/resources/gitlab.rb:1:in `class_from_file'
 /opt/chef/embedded/lib/ruby/gems/2.3.0/gems/chef-12.16.42/lib/chef/mixin/from_file.rb:42:in `class_eval'
 /opt/chef/embedded/lib/ruby/gems/2.3.0/gems/chef-12.16.42/lib/chef/mixin/from_file.rb:42:in `class_from_file'
 /opt/chef/embedded/lib/ruby/gems/2.3.0/gems/chef-12.16.42/lib/chef/resource/lwrp_base.rb:58:in `build_from_file'

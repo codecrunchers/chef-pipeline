@@ -1,3 +1,4 @@
+require 'gitlab'
 property :host, String
 property :post_data,  :kind_of => Hash
 
@@ -12,6 +13,11 @@ action :setup do
 #  assign_group(token)
 end
 
+
+def user_info()
+#  GET /users
+end
+
 def add_members(token)
   ["demo-user"].each do |user|
     Chef::Log.debug("Adding User=  #{user}")
@@ -22,9 +28,33 @@ def add_members(token)
                    :password=>"password",
                    :private_token=>token}
     host_g = group_create_url
+    response = doPost(host_g,post_data_g)
+    Chef::Log.debug("response gem install gitlab=  #{response}")
+    #add ssh key
+    userid = response['id']
+    Chef::Log.debug("Adding User ssh key=  #{id}")
+    group_create_url = "#{node.default['pipeline']['gitlab_url']}/users/:id/keys"
+    post_data_g = {:id=>userid,
+                   :title=>"test-key",
+                   :key=>"ssh key",
+                   :private_token=>token}
+
+
+    host_g = group_create_url
     Chef::Log.debug("Token =  #{token}")
     response = doPost(host_g,post_data_g)
     Chef::Log.debug("response =  #{response}")
+    #add to group
+    Chef::Log.debug("Adding User to group=  #{id}")
+    group_create_url = "#{node.default['pipeline']['gitlab_url']}/groups/:id/members"
+    post_data_g = {:user_id=>userid,
+                   :access_level=>30,
+                   :private_token=>token}
+    host_g = group_create_url
+    response = doPost(host_g,post_data_g)
+    Chef::Log.debug("response =  #{response}")
+
+
   end
 end
 

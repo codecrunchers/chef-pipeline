@@ -1,3 +1,7 @@
+require 'gitlab'
+require 'securerandom'
+
+
 property :host, String
 property :post_data,  :kind_of => Hash
 
@@ -6,66 +10,29 @@ action :setup do
   Chef::Log.debug("Calling (POST) %{host}")
   response = doPost(host,post_data)
   token = response['private_token']
-#  add_group(token)
-  add_members(token)
-#  add_project(token)
-#  assign_group(token)
-end
+  proj_name=SecureRandom.hex
 
-def add_members(token)
-  ["demo-user"].each do |user|
-    Chef::Log.debug("Adding User=  #{user}")
-    group_create_url = "#{node.default['pipeline']['gitlab_url']}/users"
-    post_data_g = {:name=>'apm-chef-user',
-                   :username=>"apm-chef-user",
-                   :email=>"#{user}@pipeline.com",
-                   :password=>"password",
-                   :private_token=>token}
-    host_g = group_create_url
-    response = doPost(host_g,post_data_g)
-    Chef::Log.debug("response =  #{response}")
-    #add ssh key
-    userid = response['id']
-    Chef::Log.debug("Adding User ssh key=  #{id}")
-    group_create_url = "#{node.default['pipeline']['gitlab_url']}/users/:id/keys"
-    post_data_g = {:id=>userid,
-                   :title=>"test-key",
-                   :key=>"ssh key",
-                   :private_token=>token}
-
-
-    host_g = group_create_url
-    Chef::Log.debug("Token =  #{token}")
-    response = doPost(host_g,post_data_g)
-    Chef::Log.debug("response =  #{response}")
-    #add to group
-    Chef::Log.debug("Adding User to group=  #{id}")
-    group_create_url = "#{node.default['pipeline']['gitlab_url']}/groups/:id/members"
-    post_data_g = {:user_id=>userid,
-                   :access_level=>30,
-                   :private_token=>token}
-    host_g = group_create_url
-    response = doPost(host_g,post_data_g)
-    Chef::Log.debug("response =  #{response}")
-
-
+  Gitlab.configure do |config|
+    config.endpoint       = 'http://localhost:10080/api/v3'
+    config.private_token  = token
   end
-end
 
-def  add_project(token) 
-end
-def assign_group(token) 
-end
-def add_group(token)
-  group_create_url = "#{node.default['pipeline']['gitlab_url']}/groups"
-  post_data_g = {:name=>'apm-chef',:path=>"apm-chef",:private_token=>token}
-  host_g = group_create_url
-  Chef::Log.debug("Token =  #{token}")
-  response = doPost(host_g,post_data_g)
-  Chef::Log.debug("response =  #{response}")
-end
+  begin
+    group=Gitlab.client.create_group(proj_name,proj_name,{})
+    project=Gitlab.client.create_project(proj_name,{})
+    [{:name=>proj_name,:key=>"adasd"}].each do |user|
+      Chef::Log.debug("Creating #{user[:name]} for #{proj_name}")
+      email="#{proj_name}@x.org".to_s
+      userObj=Gitlab.client.create_user(email, 'password', "#{user[:name]}", { name: 'Demo User' })
+      Gitlab.client.add_group_member(group.id, userObj.id, 40)
+      Gitlab.client.transfer_project_to_group(group.id,project.id)
+    end
+    Chef::Log.debug("Group #{group.id}")
+  rescue
+    Chef::Log.debug("Move on #{$!}")
+  end
 
-
+end
 
 def doPost(_host,_post_data)
   url = _host

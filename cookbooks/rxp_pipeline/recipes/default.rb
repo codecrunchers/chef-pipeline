@@ -5,6 +5,8 @@
 # Copyright (c) 2016 The Authors, All Rights Reserved.
 #
 
+chef_gem 'gitlab'
+
 bash 'restore volume' do
   code <<-EOH
     #docker create -v /data/jenkins-ci/ --name jenkins_home-chef busybox true
