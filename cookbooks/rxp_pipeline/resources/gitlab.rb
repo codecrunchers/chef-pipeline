@@ -1,6 +1,7 @@
 require 'gitlab'
 require 'pp'
 require 'securerandom'
+require 'open-uri'
 
 
 property :host, String
@@ -16,10 +17,13 @@ action :setup do
   Chef::Log.debug("Calling (POST) %{host}")
   response = doHttpPost(host,post_data)
   token = response['private_token']
-  proj_name=SecureRandom.hex
+  proj_name="#{sanitize_filename(node['pipeline']['project_name'])}#{SecureRandom.hex.to_s}"
+  Chef::Log.debug("Creating Project: #{proj_name}")
+
 
   Gitlab.configure do |config|
-    config.endpoint       = 'http://localhost:10080/api/v3'
+    url="#{node['pipeline']['services'][2]}"
+    config.endpoint       = "#{url}/api/v3"
     config.private_token  = token
   end
 
@@ -28,12 +32,12 @@ action :setup do
     project=create_project(proj_name,{})
 
     node["pipeline"]["user"].each do |user|
-      Chef::Log.debug("Creating #{user[:name]} for #{proj_name}")
-
-      email="#{proj_name}@x.org".to_s
-      userObj=create_user(email, 'password', SecureRandom.hex, { name: "#{SecureRandom.hex} Demo User" })
+      suser_name="#{user["name"]}#{SecureRandom.hex.to_s}"
+      email_address="dev@#{proj_name}.org"
+      Chef::Log.debug("Creating #{suser_name} for #{proj_name} for email: #{email_address}")
+      userObj=create_user(email_address, 'password', suser_name, { "name": "User" })
       add_user_to_group(userObj,group)
-      add_user_ssh_key(user)
+#      add_user_ssh_key(user)
       assign_project_to_group(project,group)
     end
   rescue
@@ -44,8 +48,8 @@ end
 
 def create_group(proj_name,options = {})
   group =  Gitlab.client.create_group(proj_name,proj_name,options)
-  PP.pp(group)
-#  Chef::Log.debug("Group #{PP.pp(group)}")
+#  PP.pp(group)
+  Chef::Log.debug("Group #{PP.pp(group)}")
   return group
 end
 
@@ -57,16 +61,18 @@ def create_project(proj_name,options={})
 end
 
 def create_user(email,password,username,jsonAttrs)
-  user = Gitlab.client.create_user(email, password, "Username: #{username}" , jsonAttrs)
+  user = Gitlab.client.create_user(email, password, username , jsonAttrs)
   PP.pp(user)
   return user
 end
 
 def add_user_to_group(user,group)
+  Chef::Log.debug("Adding #{user.id} to #{group.id}")
   Gitlab.client.add_group_member(group.id, user.id, 40)
 end
 
 def assign_project_to_group(project,group)
+  Chef::Log.debug("Assigning #{project.name} (#{project.id}) to #{group.name} (#{group.id})")
   Gitlab.client.transfer_project_to_group(group.id,project.id)
 end
 

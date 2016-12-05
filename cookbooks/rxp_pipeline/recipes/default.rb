@@ -9,6 +9,8 @@ chef_gem 'gitlab'
 
 include_recipe 'rxp_pipeline::docker'
 include_recipe 'rxp_pipeline::gitlab_config'
+include_recipe 'rxp_pipeline::jenkins'
+
 
 
 
