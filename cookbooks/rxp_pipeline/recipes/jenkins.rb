@@ -25,6 +25,9 @@ ruby_block 'create job' do
     open(project_xml) {|f|
       data = f.read # This returns a string even if the file is empty.
       @client.job.create(proj_name,data)
+      @client.exec_cli(proj_name,data)
+
+
     }
     Chef::Log.debug("Done Creating #{proj_name}")
   end

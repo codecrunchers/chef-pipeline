@@ -60,6 +60,16 @@
       </extensions>
     </scm>
     <scriptPath>Jenkinsfile</scriptPath>
+    </definition>
+ <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.23">
+    <script>node {
+     stage(&apos;Build&apos;) {
+         checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;aae31c6d-5398-4d1b-ac4d-98bcdfe23258&apos;, url: &apos;ssh://git@gitlab/test1/test1.git&apos;]]])
+        sh &apos;/usr/local/maven/bin/mvn clean compile&apos; // &lt;1&gt;
+
+    }
+}</script>
+    <sandbox>true</sandbox>
   </definition>
   <triggers/>
 </flow-definition>
