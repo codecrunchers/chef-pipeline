@@ -10,7 +10,7 @@ Chef::Log.debug("Creating #{proj_name}")
 
 
 template "#{proj_filename}" do
-  source 'jenkins/jenkins.job.erb'
+  source 'jenkins/jenkins.project.job.erb'
   variables(
     :PROJECT_NAME_GIT =>proj_name,
     :PROJECT_GROUP => proj_name
