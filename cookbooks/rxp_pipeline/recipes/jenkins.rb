@@ -2,7 +2,8 @@ require 'jenkins_api_client'
 require 'open-uri'
 require 'securerandom'
 
-postfx=SecureRandom.hex(10).to_s
+postfx=""
+#SecureRandom.hex(10).to_s
 proj_name="#{sanitize_filename(node['pipeline']['project_name'])}#{postfx}"
 proj_filename = "/tmp/project_#{proj_name}.xml"
 Chef::Log.debug("Creating #{proj_name}")

@@ -17,7 +17,7 @@ action :setup do
   Chef::Log.debug("Calling (POST) %{host}")
   response = doHttpPost(host,post_data)
   token = response['private_token']
-  proj_name="#{sanitize_filename(node['pipeline']['project_name'])}#{SecureRandom.hex.to_s}"
+  proj_name="#{sanitize_filename(node['pipeline']['project_name'])}"
   Chef::Log.debug("Creating Project: #{proj_name}")
 
 
@@ -45,6 +45,10 @@ action :setup do
   end
 
 end
+
+
+#Gitlab.create_deploy_key(42, 'My Key', 'Key contents')
+
 
 def create_group(proj_name,options = {})
   group =  Gitlab.client.create_group(proj_name,proj_name,options)
